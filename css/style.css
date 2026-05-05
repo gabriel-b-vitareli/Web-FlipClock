@@ -180,6 +180,70 @@ body {
 .fab:hover { color: var(--text); border-color: rgba(255,255,255,0.28); background: #222; }
 .fab.active { color: var(--text); border-color: rgba(255,255,255,0.3); }
 
+/* FAB SEGUNDO (empilhado acima) */
+.fab--timer {
+  bottom: 88px; /* 28 + 48 + 12 */
+}
+
+/* TEMPORIZADOR — INPUT DE CONFIGURAÇÃO */
+.tm-setup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tm-input-group {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.tm-input {
+  width: 52px;
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Bebas Neue', system-ui, sans-serif;
+  font-size: 28px;
+  text-align: center;
+  padding: 6px 4px;
+  outline: none;
+  transition: border-color 0.2s;
+  -moz-appearance: textfield;
+}
+
+.tm-input::-webkit-outer-spin-button,
+.tm-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.tm-input:focus { border-color: rgba(255,255,255,0.32); }
+.tm-input:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.tm-input-label {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tm-input-sep {
+  font-size: 24px;
+  color: var(--muted);
+  line-height: 1;
+  user-select: none;
+}
+
+.tm-setup.hidden { display: none; }
+
+/* TEMPORIZADOR — alerta quando zera */
+@keyframes pulse-red {
+  0%, 100% { border-color: rgba(255,80,80,0.4); }
+  50%       { border-color: rgba(255,80,80,0.9); }
+}
+
+.card.done span { color: #ff6060; }
+
 /* CRONÔMETRO */
 .sw-sep { font-size: 28px; margin-bottom: 22px; }
 
@@ -206,3 +270,4 @@ body {
 .sw-btn.running { border-color: rgba(255,80,80,0.5); color: #ff6060; }
 .sw-btn--ghost { background: transparent; color: var(--muted); }
 .sw-btn--ghost:hover { background: transparent; color: var(--text); }
+
