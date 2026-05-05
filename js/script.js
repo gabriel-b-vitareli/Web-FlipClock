@@ -157,3 +157,149 @@ fab.addEventListener('click', () => {
   pageStopwatch.classList.toggle('hidden', onClock);
   fab.classList.toggle('active', !onClock);
 });
+
+/* ─── TEMPORIZADOR ─── */
+const tmState = { h: [-1,-1], m: [-1,-1], s: [-1,-1] };
+const tmUnits = {
+  h: buildUnit(document.getElementById('tm-h')),
+  m: buildUnit(document.getElementById('tm-m')),
+  s: buildUnit(document.getElementById('tm-s'))
+};
+
+const tmSetup      = document.getElementById('tm-setup');
+const tmInputH     = document.getElementById('tm-input-h');
+const tmInputM     = document.getElementById('tm-input-m');
+const tmInputS     = document.getElementById('tm-input-s');
+const btnTmStart   = document.getElementById('tm-startstop');
+const btnTmReset   = document.getElementById('tm-reset');
+
+let tmRunning    = false;
+let tmRaf        = null;
+let tmEndTime    = 0;      // timestamp absoluto (ms) quando o timer chega a zero
+let tmRemaining  = 0;      // ms restantes ao pausar
+let tmDone       = false;
+
+function tmTotalFromInputs() {
+  const h = Math.max(0, parseInt(tmInputH.value) || 0);
+  const m = Math.max(0, parseInt(tmInputM.value) || 0);
+  const s = Math.max(0, parseInt(tmInputS.value) || 0);
+  return (h * 3600 + m * 60 + s) * 1000;
+}
+
+function tmRenderMs(ms) {
+  const totalS = Math.ceil(ms / 1000);
+  const h = Math.floor(totalS / 3600) % 100;
+  const m = Math.floor(totalS / 60) % 60;
+  const s = totalS % 60;
+
+  updateDigits(tmUnits, tmState, {
+    h: pad(h).split(''),
+    m: pad(m).split(''),
+    s: pad(s).split('')
+  });
+}
+
+function tmTick() {
+  const left = tmEndTime - performance.now();
+
+  if (left <= 0) {
+    tmRenderMs(0);
+    tmDone = true;
+    tmRunning = false;
+    btnTmStart.textContent = 'iniciar';
+    btnTmStart.classList.remove('running');
+    // pisca os cards
+    document.querySelectorAll('#page-timer .card span').forEach(el => el.classList.add('done'));
+    return;
+  }
+
+  tmRenderMs(left);
+  tmRaf = requestAnimationFrame(tmTick);
+}
+
+// Renderiza o display assim que o usuário edita os inputs
+[tmInputH, tmInputM, tmInputS].forEach(inp => {
+  inp.addEventListener('input', () => {
+    if (!tmRunning && !tmDone) {
+      const ms = tmTotalFromInputs();
+      // reseta estado pra forçar re-render
+      for (const k in tmState) tmState[k] = [-1,-1];
+      tmRenderMs(ms);
+    }
+  });
+});
+
+btnTmStart.addEventListener('click', () => {
+  if (tmDone) return; // precisa dar reset primeiro
+
+  if (!tmRunning) {
+    // Primeira vez ou retomando
+    if (tmRemaining === 0) {
+      tmRemaining = tmTotalFromInputs();
+      if (tmRemaining <= 0) return;
+    }
+    // Esconde inputs durante a contagem
+    tmSetup.classList.add('hidden');
+    [tmInputH, tmInputM, tmInputS].forEach(i => i.disabled = true);
+
+    tmEndTime = performance.now() + tmRemaining;
+    tmRaf = requestAnimationFrame(tmTick);
+    btnTmStart.textContent = 'pausar';
+    btnTmStart.classList.add('running');
+    // limpa piscar
+    document.querySelectorAll('#page-timer .card span').forEach(el => el.classList.remove('done'));
+  } else {
+    cancelAnimationFrame(tmRaf);
+    tmRemaining = tmEndTime - performance.now();
+    btnTmStart.textContent = 'continuar';
+    btnTmStart.classList.remove('running');
+  }
+
+  tmRunning = !tmRunning;
+});
+
+btnTmReset.addEventListener('click', () => {
+  cancelAnimationFrame(tmRaf);
+  tmRunning   = false;
+  tmDone      = false;
+  tmRemaining = 0;
+  btnTmStart.textContent = 'iniciar';
+  btnTmStart.classList.remove('running');
+  [tmInputH, tmInputM, tmInputS].forEach(i => { i.disabled = false; i.value = 0; });
+  tmSetup.classList.remove('hidden');
+  document.querySelectorAll('#page-timer .card span').forEach(el => el.classList.remove('done'));
+  for (const k in tmState) tmState[k] = [-1,-1];
+  tmRenderMs(0);
+});
+
+// Render inicial
+tmRenderMs(0);
+
+/* ─── NAVEGAÇÃO (atualizada para 3 páginas) ─── */
+const pageTimer  = document.getElementById('page-timer');
+const fabTimer   = document.getElementById('fab-timer');
+
+// O fab e pageClock/pageStopwatch já estão declarados acima no script original
+// Precisamos substituir o listener antigo — usamos uma flag de página: 'clock' | 'stopwatch' | 'timer'
+let currentPage = 'clock';
+
+function showPage(name) {
+  pageClock.classList.toggle('hidden',     name !== 'clock');
+  pageStopwatch.classList.toggle('hidden', name !== 'stopwatch');
+  pageTimer.classList.toggle('hidden',     name !== 'timer');
+  fab.classList.toggle('active',      name === 'stopwatch');
+  fabTimer.classList.toggle('active', name === 'timer');
+  currentPage = name;
+}
+
+// remove listener antigo do fab (substituímos a lógica)
+fab.replaceWith(fab.cloneNode(true));
+const fabNew = document.getElementById('fab');
+
+fabNew.addEventListener('click', () => {
+  showPage(currentPage === 'stopwatch' ? 'clock' : 'stopwatch');
+});
+
+fabTimer.addEventListener('click', () => {
+  showPage(currentPage === 'timer' ? 'clock' : 'timer');
+});
