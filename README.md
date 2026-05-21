@@ -84,6 +84,6 @@ Com o projeto em andamento, mais funcionalidades serão adicionadas com o tempo.
 - [X] Relógio de Horas, Minutos e Segundos em tempo real.
 - [X] Data em tempo real.
 - [X] Cronômetro.
-- [ ] Temporizador.
+- [X] Temporizador.
 - [ ] Temas (Para o usuário poder selecionar entre diferentes cores de fundo, imagens de fundo, fontes do relógio, estilo do relógio, etc).
 - [ ] Diferentes linguagens.
