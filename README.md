@@ -1,4 +1,4 @@
-# 🕰️ Modern Flip Clock
+# 🕰️ Web Flip Clock
 
 Clique [aqui](https://gabriel-b-vitareli.github.io/relogio-digital/) para acessar o site do relógio.
 
