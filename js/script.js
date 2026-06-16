@@ -1,3 +1,7 @@
+/* ═══════════════════════════════════════════════════════
+   FLIP CLOCK — script.js
+   ═══════════════════════════════════════════════════════ */
+
 /* ─── UTILS ─── */
 function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -17,10 +21,10 @@ function buildUnit(el) {
 }
 
 function flipDigit(card, from, to) {
-  const top   = card.querySelector('.card-top span');
-  const bot   = card.querySelector('.card-bot span');
-  const ft    = card.querySelector('.flip-top');
-  const fb    = card.querySelector('.flip-bot');
+  const top = card.querySelector('.card-top span');
+  const bot = card.querySelector('.card-bot span');
+  const ft  = card.querySelector('.flip-top');
+  const fb  = card.querySelector('.flip-bot');
 
   top.textContent = to;
   bot.textContent = to;
@@ -51,42 +55,183 @@ function updateDigits(unitMap, stateMap, vals) {
   }
 }
 
-/* ─── RELÓGIO ─── */
+/* ─── TOAST ─── */
+let toastTimer = null;
+function showToast(msg, duration = 2500) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('visible'), duration);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SISTEMA DE TEMAS
+   ═══════════════════════════════════════════════════════ */
+const STORAGE_THEME_KEY = 'flipclock-theme';
+
+function applyTheme(themeId) {
+  const theme = window.THEMES.find(t => t.id === themeId) || window.THEMES[0];
+  const root  = document.documentElement;
+  for (const [prop, val] of Object.entries(theme.vars)) {
+    root.style.setProperty(prop, val);
+  }
+  // Marca o botão ativo no painel
+  document.querySelectorAll('.theme-swatch').forEach(el => {
+    el.classList.toggle('active', el.dataset.themeId === theme.id);
+  });
+  localStorage.setItem(STORAGE_THEME_KEY, theme.id);
+}
+
+function buildThemePanel() {
+  const grid = document.getElementById('theme-grid');
+  grid.innerHTML = '';
+  window.THEMES.forEach(theme => {
+    const btn = document.createElement('button');
+    btn.className = 'theme-swatch';
+    btn.dataset.themeId = theme.id;
+    btn.title = theme.name;
+
+    // Preview de 3 cores (bg, card, text)
+    const [c1, c2, c3] = theme.preview;
+    btn.innerHTML = `
+      <div class="swatch-preview" style="background:${c1}">
+        <div class="swatch-card" style="background:${c2}">
+          <span style="color:${c3}">8</span>
+        </div>
+      </div>
+      <div class="swatch-name">${theme.name}</div>`;
+
+    btn.addEventListener('click', () => {
+      applyTheme(theme.id);
+      closeThemePanel();
+      showToast(`Tema: ${theme.name}`);
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function openThemePanel() {
+  document.getElementById('theme-panel').classList.add('open');
+}
+function closeThemePanel() {
+  document.getElementById('theme-panel').classList.remove('open');
+}
+function toggleThemePanel() {
+  document.getElementById('theme-panel').classList.toggle('open');
+}
+
+// Fechar clicando fora
+document.addEventListener('click', (e) => {
+  const panel  = document.getElementById('theme-panel');
+  const btnThm = document.getElementById('btn-theme');
+  if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btnThm && !btnThm.contains(e.target)) {
+    closeThemePanel();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   MODO ZEN (clean mode)
+   ═══════════════════════════════════════════════════════ */
+let zenMode = false;
+
+function setZen(on) {
+  zenMode = on;
+  document.body.classList.toggle('zen', on);
+  const hint = document.getElementById('zen-hint');
+  if (on) {
+    hint.classList.add('visible');
+    setTimeout(() => hint.classList.remove('visible'), 3000);
+  } else {
+    hint.classList.remove('visible');
+  }
+}
+
+function toggleZen() { setZen(!zenMode); }
+
+/* ═══════════════════════════════════════════════════════
+   NAVEGAÇÃO
+   ═══════════════════════════════════════════════════════ */
+const PAGES = ['clock', 'stopwatch', 'timer'];
+let currentPage = 'clock';
+
+function showPage(name) {
+  if (!PAGES.includes(name)) return;
+  PAGES.forEach(p => {
+    document.getElementById(`page-${p}`).classList.toggle('hidden', p !== name);
+  });
+  document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === name);
+  });
+  currentPage = name;
+}
+
+// Sidebar nav buttons
+document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => showPage(btn.dataset.page));
+});
+
+document.getElementById('btn-theme').addEventListener('click', toggleThemePanel);
+document.getElementById('btn-clean').addEventListener('click', toggleZen);
+
+/* ═══════════════════════════════════════════════════════
+   ATALHOS DE TECLADO
+   ═══════════════════════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+  // Ignora se estiver digitando num input
+  if (e.target.tagName === 'INPUT') return;
+
+  switch (e.key) {
+    case '1': showPage('clock');      break;
+    case '2': showPage('stopwatch');  break;
+    case '3': showPage('timer');      break;
+    case 'z':
+    case 'Z':
+    case 'f':
+    case 'F': toggleZen();            break;
+    case 't':
+    case 'T': toggleThemePanel();     break;
+    case 'Escape':
+      if (zenMode) setZen(false);
+      closeThemePanel();
+      break;
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   RELÓGIO
+   ═══════════════════════════════════════════════════════ */
 const clockState = { h: [-1,-1], m: [-1,-1], s: [-1,-1] };
 const clockUnits = {
-  h:  buildUnit(document.getElementById('h')),
-  m:  buildUnit(document.getElementById('m')),
-  s:  buildUnit(document.getElementById('s'))
+  h: buildUnit(document.getElementById('h')),
+  m: buildUnit(document.getElementById('m')),
+  s: buildUnit(document.getElementById('s'))
 };
 
 const dateEl = document.getElementById('date-display');
 const DAYS   = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
 const MONTHS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-
 let lastDate = -1;
 
 function tickClock() {
   const now = new Date();
-
   updateDigits(clockUnits, clockState, {
     h: pad(now.getHours()).split(''),
     m: pad(now.getMinutes()).split(''),
     s: pad(now.getSeconds()).split('')
   });
-
   const day = now.getDate();
   if (day !== lastDate) {
     lastDate = day;
-    const dow = DAYS[now.getDay()];
-    const mon = MONTHS[now.getMonth()];
-    dateEl.textContent = `${dow}, ${day} de ${mon} de ${now.getFullYear()}`;
+    dateEl.textContent = `${DAYS[now.getDay()]}, ${day} de ${MONTHS[now.getMonth()]} de ${now.getFullYear()}`;
   }
 }
-
 tickClock();
 setInterval(tickClock, 1000);
 
-/* ─── CRONÔMETRO ─── */
+/* ═══════════════════════════════════════════════════════
+   CRONÔMETRO
+   ═══════════════════════════════════════════════════════ */
 const swState = { m: [-1,-1], s: [-1,-1], cs: [-1,-1] };
 const swUnits = {
   m:  buildUnit(document.getElementById('sw-m')),
@@ -94,71 +239,48 @@ const swUnits = {
   cs: buildUnit(document.getElementById('sw-cs'))
 };
 
-let swRunning   = false;
-let swStartTime = 0;
-let swElapsed   = 0;
-let swRaf       = null;
-
-const btnStartStop = document.getElementById('sw-startstop');
-const btnReset     = document.getElementById('sw-reset');
+let swRunning = false, swStartTime = 0, swElapsed = 0, swRaf = null;
+const btnSwStart = document.getElementById('sw-startstop');
+const btnSwReset = document.getElementById('sw-reset');
 
 function tickStopwatch() {
   const total = swElapsed + (performance.now() - swStartTime);
-  const cs    = Math.floor(total / 10) % 100;
-  const s     = Math.floor(total / 1000) % 60;
-  const m     = Math.floor(total / 60000) % 100;
-
   updateDigits(swUnits, swState, {
-    m:  pad(m).split(''),
-    s:  pad(s).split(''),
-    cs: pad(cs).split('')
+    m:  pad(Math.floor(total / 60000) % 100).split(''),
+    s:  pad(Math.floor(total / 1000) % 60).split(''),
+    cs: pad(Math.floor(total / 10) % 100).split('')
   });
-
   swRaf = requestAnimationFrame(tickStopwatch);
 }
 
-btnStartStop.addEventListener('click', () => {
+btnSwStart.addEventListener('click', () => {
   if (!swRunning) {
     swStartTime = performance.now();
     swRaf = requestAnimationFrame(tickStopwatch);
-    btnStartStop.textContent = 'pausar';
-    btnStartStop.classList.add('running');
+    btnSwStart.textContent = 'pausar';
+    btnSwStart.classList.add('running');
   } else {
     cancelAnimationFrame(swRaf);
     swElapsed += performance.now() - swStartTime;
-    btnStartStop.textContent = 'continuar';
-    btnStartStop.classList.remove('running');
+    btnSwStart.textContent = 'continuar';
+    btnSwStart.classList.remove('running');
   }
   swRunning = !swRunning;
 });
 
-btnReset.addEventListener('click', () => {
+btnSwReset.addEventListener('click', () => {
   cancelAnimationFrame(swRaf);
-  swRunning = false;
-  swElapsed = 0;
-  btnStartStop.textContent = 'iniciar';
-  btnStartStop.classList.remove('running');
-
-  // reset visual
+  swRunning = false; swElapsed = 0;
+  btnSwStart.textContent = 'iniciar';
+  btnSwStart.classList.remove('running');
   for (const k in swState) swState[k] = [-1,-1];
   updateDigits(swUnits, swState, { m: ['0','0'], s: ['0','0'], cs: ['0','0'] });
   for (const k in swState) swState[k] = ['0','0'];
 });
 
-/* ─── NAVEGAÇÃO ─── */
-const pageClock     = document.getElementById('page-clock');
-const pageStopwatch = document.getElementById('page-stopwatch');
-const fab           = document.getElementById('fab');
-let onClock = true;
-
-fab.addEventListener('click', () => {
-  onClock = !onClock;
-  pageClock.classList.toggle('hidden', !onClock);
-  pageStopwatch.classList.toggle('hidden', onClock);
-  fab.classList.toggle('active', !onClock);
-});
-
-/* ─── TEMPORIZADOR ─── */
+/* ═══════════════════════════════════════════════════════
+   TEMPORIZADOR + ALARME
+   ═══════════════════════════════════════════════════════ */
 const tmState = { h: [-1,-1], m: [-1,-1], s: [-1,-1] };
 const tmUnits = {
   h: buildUnit(document.getElementById('tm-h')),
@@ -166,18 +288,82 @@ const tmUnits = {
   s: buildUnit(document.getElementById('tm-s'))
 };
 
-const tmSetup      = document.getElementById('tm-setup');
-const tmInputH     = document.getElementById('tm-input-h');
-const tmInputM     = document.getElementById('tm-input-m');
-const tmInputS     = document.getElementById('tm-input-s');
-const btnTmStart   = document.getElementById('tm-startstop');
-const btnTmReset   = document.getElementById('tm-reset');
+const tmSetup    = document.getElementById('tm-setup');
+const tmInputH   = document.getElementById('tm-input-h');
+const tmInputM   = document.getElementById('tm-input-m');
+const tmInputS   = document.getElementById('tm-input-s');
+const btnTmStart = document.getElementById('tm-startstop');
+const btnTmReset = document.getElementById('tm-reset');
 
-let tmRunning    = false;
-let tmRaf        = null;
-let tmEndTime    = 0;      // timestamp absoluto (ms) quando o timer chega a zero
-let tmRemaining  = 0;      // ms restantes ao pausar
-let tmDone       = false;
+let tmRunning = false, tmRaf = null, tmEndTime = 0, tmRemaining = 0, tmDone = false;
+let alarmInterval = null;
+
+// Áudio sintetizado via Web Audio API
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playBeep(freq = 880, duration = 0.15, gain = 0.4) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const vol = ctx.createGain();
+    osc.connect(vol);
+    vol.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    vol.gain.setValueAtTime(gain, ctx.currentTime);
+    vol.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch (e) { /* silencia se Web Audio não disponível */ }
+}
+
+function playAlarmPattern() {
+  // Toca um padrão de 3 bips
+  playBeep(880, 0.12, 0.5);
+  setTimeout(() => playBeep(880, 0.12, 0.5), 180);
+  setTimeout(() => playBeep(1100, 0.25, 0.6), 360);
+}
+
+function triggerAlarm() {
+  const overlay = document.getElementById('alarm-overlay');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('ringing');
+
+  // Toca o padrão e repete enquanto o overlay estiver aberto
+  playAlarmPattern();
+  alarmInterval = setInterval(playAlarmPattern, 1800);
+
+  // Se estiver em zen mode, sai pra mostrar o overlay
+  if (zenMode) setZen(false);
+
+  // Navega pra página do timer caso o usuário esteja em outra
+  showPage('timer');
+
+  // Notificação de sistema (se permitido)
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('⏰ Flip Clock', { body: 'Seu temporizador chegou ao fim!' });
+  }
+}
+
+function dismissAlarm() {
+  clearInterval(alarmInterval);
+  document.getElementById('alarm-overlay').classList.add('hidden');
+  document.getElementById('alarm-overlay').classList.remove('ringing');
+}
+
+document.getElementById('alarm-dismiss').addEventListener('click', dismissAlarm);
+document.getElementById('alarm-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) dismissAlarm();
+});
+
+// Pede permissão de notificação ao carregar
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
 
 function tmTotalFromInputs() {
   const h = Math.max(0, parseInt(tmInputH.value) || 0);
@@ -188,65 +374,51 @@ function tmTotalFromInputs() {
 
 function tmRenderMs(ms) {
   const totalS = Math.ceil(ms / 1000);
-  const h = Math.floor(totalS / 3600) % 100;
-  const m = Math.floor(totalS / 60) % 60;
-  const s = totalS % 60;
-
   updateDigits(tmUnits, tmState, {
-    h: pad(h).split(''),
-    m: pad(m).split(''),
-    s: pad(s).split('')
+    h: pad(Math.floor(totalS / 3600) % 100).split(''),
+    m: pad(Math.floor(totalS / 60) % 60).split(''),
+    s: pad(totalS % 60).split('')
   });
 }
 
 function tmTick() {
   const left = tmEndTime - performance.now();
-
   if (left <= 0) {
     tmRenderMs(0);
-    tmDone = true;
+    tmDone    = true;
     tmRunning = false;
     btnTmStart.textContent = 'iniciar';
     btnTmStart.classList.remove('running');
-    // pisca os cards
     document.querySelectorAll('#page-timer .card span').forEach(el => el.classList.add('done'));
+    triggerAlarm();
     return;
   }
-
   tmRenderMs(left);
   tmRaf = requestAnimationFrame(tmTick);
 }
 
-// Renderiza o display assim que o usuário edita os inputs
 [tmInputH, tmInputM, tmInputS].forEach(inp => {
   inp.addEventListener('input', () => {
     if (!tmRunning && !tmDone) {
-      const ms = tmTotalFromInputs();
-      // reseta estado pra forçar re-render
       for (const k in tmState) tmState[k] = [-1,-1];
-      tmRenderMs(ms);
+      tmRenderMs(tmTotalFromInputs());
     }
   });
 });
 
 btnTmStart.addEventListener('click', () => {
-  if (tmDone) return; // precisa dar reset primeiro
-
+  if (tmDone) return;
   if (!tmRunning) {
-    // Primeira vez ou retomando
     if (tmRemaining === 0) {
       tmRemaining = tmTotalFromInputs();
       if (tmRemaining <= 0) return;
     }
-    // Esconde inputs durante a contagem
     tmSetup.classList.add('hidden');
     [tmInputH, tmInputM, tmInputS].forEach(i => i.disabled = true);
-
     tmEndTime = performance.now() + tmRemaining;
     tmRaf = requestAnimationFrame(tmTick);
     btnTmStart.textContent = 'pausar';
     btnTmStart.classList.add('running');
-    // limpa piscar
     document.querySelectorAll('#page-timer .card span').forEach(el => el.classList.remove('done'));
   } else {
     cancelAnimationFrame(tmRaf);
@@ -254,15 +426,13 @@ btnTmStart.addEventListener('click', () => {
     btnTmStart.textContent = 'continuar';
     btnTmStart.classList.remove('running');
   }
-
   tmRunning = !tmRunning;
 });
 
 btnTmReset.addEventListener('click', () => {
   cancelAnimationFrame(tmRaf);
-  tmRunning   = false;
-  tmDone      = false;
-  tmRemaining = 0;
+  dismissAlarm();
+  tmRunning = false; tmDone = false; tmRemaining = 0;
   btnTmStart.textContent = 'iniciar';
   btnTmStart.classList.remove('running');
   [tmInputH, tmInputM, tmInputS].forEach(i => { i.disabled = false; i.value = 0; });
@@ -272,34 +442,11 @@ btnTmReset.addEventListener('click', () => {
   tmRenderMs(0);
 });
 
-// Render inicial
 tmRenderMs(0);
 
-/* ─── NAVEGAÇÃO (atualizada para 3 páginas) ─── */
-const pageTimer  = document.getElementById('page-timer');
-const fabTimer   = document.getElementById('fab-timer');
-
-// O fab e pageClock/pageStopwatch já estão declarados acima no script original
-// Precisamos substituir o listener antigo — usamos uma flag de página: 'clock' | 'stopwatch' | 'timer'
-let currentPage = 'clock';
-
-function showPage(name) {
-  pageClock.classList.toggle('hidden',     name !== 'clock');
-  pageStopwatch.classList.toggle('hidden', name !== 'stopwatch');
-  pageTimer.classList.toggle('hidden',     name !== 'timer');
-  fab.classList.toggle('active',      name === 'stopwatch');
-  fabTimer.classList.toggle('active', name === 'timer');
-  currentPage = name;
-}
-
-// remove listener antigo do fab (substituímos a lógica)
-fab.replaceWith(fab.cloneNode(true));
-const fabNew = document.getElementById('fab');
-
-fabNew.addEventListener('click', () => {
-  showPage(currentPage === 'stopwatch' ? 'clock' : 'stopwatch');
-});
-
-fabTimer.addEventListener('click', () => {
-  showPage(currentPage === 'timer' ? 'clock' : 'timer');
-});
+/* ═══════════════════════════════════════════════════════
+   INICIALIZAÇÃO
+   ═══════════════════════════════════════════════════════ */
+buildThemePanel();
+const savedTheme = localStorage.getItem(STORAGE_THEME_KEY) || window.THEMES[0].id;
+applyTheme(savedTheme);
