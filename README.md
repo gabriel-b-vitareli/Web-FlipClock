@@ -1,6 +1,6 @@
 # 🕰️ Web Flip Clock
 
-Clique [aqui](https://gabriel-b-vitareli.github.io/relogio-digital/) para acessar o site do relógio.
+Clique [aqui](https://gabriel-b-vitareli.github.io/Web-FlipClock/) para acessar o site do relógio.
 
 Este é um projeto de relógio digital com efeito **Flip** (folheado), inspirado nos clássicos relógios analógicos de aeroportos e estações de trem. Ele utiliza transições 3D para criar uma experiência visual fluida e moderna.
 
