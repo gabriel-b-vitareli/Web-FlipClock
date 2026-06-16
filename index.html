@@ -10,6 +10,81 @@
 </head>
 <body>
 
+<!-- SIDEBAR DE NAVEGAÇÃO -->
+<nav class="sidebar" id="sidebar">
+  <button class="nav-btn active" data-page="clock" title="Relógio (tecla 1)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span class="nav-label">Relógio</span>
+  </button>
+
+  <button class="nav-btn" data-page="stopwatch" title="Cronômetro (tecla 2)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="13" r="8"/>
+      <polyline points="12 9 12 13 14.5 15.5"/>
+      <path d="M9 2h6"/>
+      <path d="M12 2v3"/>
+    </svg>
+    <span class="nav-label">Cronômetro</span>
+  </button>
+
+  <button class="nav-btn" data-page="timer" title="Temporizador (tecla 3)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="7" width="20" height="15" rx="2"/>
+      <path d="M16 2H8"/>
+      <path d="M12 12v4"/>
+      <path d="M10 14h4"/>
+    </svg>
+    <span class="nav-label">Timer</span>
+  </button>
+
+  <div class="nav-divider"></div>
+
+  <!-- TEMA -->
+  <button class="nav-btn" id="btn-theme" title="Trocar tema (tecla T)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+    <span class="nav-label">Tema</span>
+  </button>
+
+  <!-- CLEAN MODE -->
+  <button class="nav-btn" id="btn-clean" title="Modo zen (tecla Z ou F)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
+    </svg>
+    <span class="nav-label">Zen</span>
+  </button>
+</nav>
+
+<!-- PAINEL DE TEMAS -->
+<div class="theme-panel" id="theme-panel">
+  <div class="theme-panel-title">Temas</div>
+  <div class="theme-grid" id="theme-grid"></div>
+</div>
+
+<!-- TOAST DE NOTIFICAÇÃO -->
+<div class="toast" id="toast"></div>
+
+<!-- OVERLAY DE ALARME -->
+<div class="alarm-overlay hidden" id="alarm-overlay">
+  <div class="alarm-content">
+    <div class="alarm-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+    </div>
+    <div class="alarm-text">Tempo esgotado</div>
+    <button class="alarm-dismiss" id="alarm-dismiss">Dispensar</button>
+  </div>
+</div>
+
 <!-- RELÓGIO -->
 <div class="page" id="page-clock">
   <div class="clock-wrap">
@@ -49,7 +124,7 @@
       <span class="label">centésimos</span>
     </div>
   </div>
-  <div class="sw-controls">
+  <div class="sw-controls ui-element">
     <button class="sw-btn" id="sw-startstop">iniciar</button>
     <button class="sw-btn sw-btn--ghost" id="sw-reset">zerar</button>
   </div>
@@ -74,8 +149,7 @@
     </div>
   </div>
 
-  <!-- INPUT DE CONFIGURAÇÃO -->
-  <div class="tm-setup" id="tm-setup">
+  <div class="tm-setup ui-element" id="tm-setup">
     <div class="tm-input-group">
       <input class="tm-input" id="tm-input-h" type="number" min="0" max="99" value="0" placeholder="00">
       <span class="tm-input-label">h</span>
@@ -92,32 +166,16 @@
     </div>
   </div>
 
-  <div class="sw-controls">
+  <div class="sw-controls ui-element">
     <button class="sw-btn" id="tm-startstop">iniciar</button>
     <button class="sw-btn sw-btn--ghost" id="tm-reset">zerar</button>
   </div>
 </div>
 
-<!-- FAB TEMPORIZADOR -->
-<button class="fab fab--timer" id="fab-timer" title="Temporizador">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="2" y="7" width="20" height="15" rx="2"/>
-    <path d="M16 2H8"/>
-    <path d="M12 12v4"/>
-    <path d="M10 14h4"/>
-  </svg>
-</button>
+<!-- HINT DE MODO ZEN -->
+<div class="zen-hint" id="zen-hint">pressione <kbd>Z</kbd> ou <kbd>F</kbd> para sair</div>
 
-<!-- FAB CRONÔMETRO -->
-<button class="fab" id="fab" title="Cronômetro">
-  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="13" r="8"/>
-    <polyline points="12 9 12 13 14.5 15.5"/>
-    <path d="M9 2h6"/>
-    <path d="M12 2v3"/>
-  </svg>
-</button>
-
+<script src="js/themes.js"></script>
 <script src="js/script.js"></script>
 </body>
 </html>
