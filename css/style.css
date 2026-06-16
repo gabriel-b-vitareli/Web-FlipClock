@@ -1,35 +1,345 @@
-/* RESET E CONFIGURAÇÕES GERAIS */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ═══════════════════════════════════════════════════════
+   FLIP CLOCK — style.css
+   ═══════════════════════════════════════════════════════ */
 
+/* ─── RESET ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── VARIÁVEIS DE TEMA (defaults = Obsidian) ─── */
 :root {
-  --bg: #0e0e0e;
-  --card: #1a1a1a;
-  --card-bot: #141414;
-  --border: rgba(255,255,255,0.08);
-  --border-mid: rgba(255,255,255,0.14);
-  --text: #f0f0f0;
-  --muted: #555;
+  --bg:          #0e0e0e;
+  --card:        #1a1a1a;
+  --card-bot:    #141414;
+  --border:      rgba(255,255,255,0.08);
+  --border-mid:  rgba(255,255,255,0.14);
+  --text:        #f0f0f0;
+  --muted:       #555;
+  --accent:      #ff6060;
+  --accent-glow: rgba(255,96,96,0.35);
   --card-height: 100px;
-  --card-width: 70px;
+  --card-width:  70px;
+  --sidebar-w:   64px;
 }
 
+/* ─── BASE ─── */
 body {
   background: var(--bg);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   font-family: 'Bebas Neue', system-ui, sans-serif;
   overflow: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
 }
 
-/* PÁGINAS */
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR DE NAVEGAÇÃO
+   ═══════════════════════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  gap: 4px;
+  z-index: 20;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.nav-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  outline: none;
+}
+
+.nav-btn:hover {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border-mid);
+}
+
+.nav-btn.active {
+  color: var(--text);
+  background: var(--card);
+  border-color: var(--border-mid);
+}
+
+/* Tooltip label */
+.nav-label {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.nav-btn:hover .nav-label { opacity: 1; }
+
+.nav-divider {
+  width: 28px;
+  height: 1px;
+  background: var(--border-mid);
+  margin: 8px 0;
+}
+
+/* Indicador de página ativa (linha esquerda) */
+.nav-btn.active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAINEL DE TEMAS
+   ═══════════════════════════════════════════════════════ */
+.theme-panel {
+  position: fixed;
+  left: calc(var(--sidebar-w) + 8px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  border-radius: 14px;
+  padding: 16px;
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  min-width: 220px;
+}
+
+.theme-panel.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(-50%) translateX(0);
+}
+
+.theme-panel-title {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.theme-swatch {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: border-color 0.15s ease;
+  outline: none;
+}
+
+.theme-swatch:hover { border-color: var(--border-mid); }
+.theme-swatch.active { border-color: var(--accent); }
+
+.swatch-preview {
+  width: 42px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(128,128,128,0.2);
+}
+
+.swatch-card {
+  width: 26px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swatch-card span {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.swatch-name {
+  font-family: system-ui, sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODO ZEN
+   ═══════════════════════════════════════════════════════ */
+body.zen .sidebar,
+body.zen .theme-panel,
+body.zen .ui-element {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.zen .sidebar { transform: translateX(-100%); }
+
+.zen-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.zen-hint.visible { opacity: 1; }
+
+.zen-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--border-mid);
+  border-radius: 4px;
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding: 10px 18px;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 50;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   OVERLAY DE ALARME
+   ═══════════════════════════════════════════════════════ */
+.alarm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.alarm-overlay.hidden { display: none; }
+
+.alarm-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.alarm-icon {
+  color: var(--accent);
+  animation: bell-ring 0.5s ease infinite alternate;
+}
+
+@keyframes bell-ring {
+  from { transform: rotate(-12deg); }
+  to   { transform: rotate(12deg); }
+}
+
+.alarm-text {
+  font-size: 28px;
+  letter-spacing: 0.12em;
+  color: var(--text);
+}
+
+.alarm-dismiss {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 36px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.alarm-dismiss:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PÁGINAS
+   ═══════════════════════════════════════════════════════ */
 .page {
   display: flex;
   flex-direction: column;
@@ -47,7 +357,7 @@ body {
   pointer-events: none;
 }
 
-/* RELÓGIO */
+/* ─── RELÓGIO ─── */
 .clock-wrap {
   display: flex;
   align-items: center;
@@ -61,12 +371,9 @@ body {
   gap: 10px;
 }
 
-.cards {
-  display: flex;
-  gap: 6px;
-}
+.cards { display: flex; gap: 6px; }
 
-/* CARD */
+/* ─── CARD ─── */
 .card {
   position: relative;
   width: var(--card-width);
@@ -74,12 +381,10 @@ body {
   perspective: 600px;
   border-radius: 8px;
   color: var(--text);
+  transition: color 0.35s ease;
 }
 
-.card-top,
-.card-bot,
-.flip-top,
-.flip-bot {
+.card-top, .card-bot, .flip-top, .flip-bot {
   position: absolute;
   left: 0;
   width: 100%;
@@ -90,24 +395,24 @@ body {
   backface-visibility: hidden;
 }
 
-.card-top,
-.flip-top {
+.card-top, .flip-top {
   top: 0;
   background: var(--card);
   border-radius: 8px 8px 0 0;
   border: 1px solid var(--border);
   border-bottom: 0.5px solid var(--border-mid);
   align-items: flex-start;
+  transition: background 0.35s ease, border-color 0.35s ease;
 }
 
-.card-bot,
-.flip-bot {
+.card-bot, .flip-bot {
   bottom: 0;
   background: var(--card-bot);
   border-radius: 0 0 8px 8px;
   border: 1px solid var(--border);
   border-top: 0.5px solid var(--border-mid);
   align-items: flex-end;
+  transition: background 0.35s ease, border-color 0.35s ease;
 }
 
 .card span {
@@ -121,24 +426,17 @@ body {
 .card-top span, .flip-top span { top: 0; }
 .card-bot span, .flip-bot span { bottom: 0; }
 
-.flip-top {
-  transform-origin: bottom;
-  z-index: 3;
-}
+.flip-top { transform-origin: bottom; z-index: 3; }
+.flip-bot { transform-origin: top; transform: rotateX(90deg); z-index: 2; }
 
-.flip-bot {
-  transform-origin: top;
-  transform: rotateX(90deg);
-  z-index: 2;
-}
-
-/* LABEL */
+/* ─── LABEL ─── */
 .label {
   font-family: system-ui, sans-serif;
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
+  transition: color 0.35s ease;
 }
 
 .sep {
@@ -147,49 +445,53 @@ body {
   margin-bottom: 22px;
   line-height: 1;
   user-select: none;
+  transition: color 0.35s ease;
 }
 
-/* DATA */
+/* ─── DATA ─── */
 .date-display {
   font-family: system-ui, sans-serif;
   font-size: 13px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
+  transition: color 0.35s ease;
 }
 
-/* FAB */
-.fab {
-  position: fixed;
-  bottom: 28px;
-  left: 28px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--card);
-  border: 1px solid var(--border-mid);
-  color: var(--muted);
-  cursor: pointer;
+/* ─── CRONÔMETRO ─── */
+.sw-sep { font-size: 28px; margin-bottom: 22px; }
+
+.sw-controls {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
-  z-index: 10;
+  gap: 12px;
+  transition: opacity 0.3s ease;
 }
 
-.fab:hover { color: var(--text); border-color: rgba(255,255,255,0.28); background: #222; }
-.fab.active { color: var(--text); border-color: rgba(255,255,255,0.3); }
-
-/* FAB SEGUNDO (empilhado acima) */
-.fab--timer {
-  bottom: 88px; /* 28 + 48 + 12 */
+.sw-btn {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 10px 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border-mid);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
-/* TEMPORIZADOR — INPUT DE CONFIGURAÇÃO */
+.sw-btn:hover { background: var(--card-bot); border-color: rgba(255,255,255,0.28); }
+.sw-btn.running { border-color: var(--accent); color: var(--accent); }
+.sw-btn--ghost { background: transparent; color: var(--muted); }
+.sw-btn--ghost:hover { background: transparent; color: var(--text); }
+
+/* ─── TEMPORIZADOR INPUT ─── */
 .tm-setup {
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: opacity 0.3s ease;
 }
 
 .tm-input-group {
@@ -209,14 +511,14 @@ body {
   text-align: center;
   padding: 6px 4px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.35s, color 0.35s;
   -moz-appearance: textfield;
 }
 
 .tm-input::-webkit-outer-spin-button,
 .tm-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-.tm-input:focus { border-color: rgba(255,255,255,0.32); }
+.tm-input:focus { border-color: var(--accent); }
 .tm-input:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .tm-input-label {
@@ -236,38 +538,5 @@ body {
 
 .tm-setup.hidden { display: none; }
 
-/* TEMPORIZADOR — alerta quando zera */
-@keyframes pulse-red {
-  0%, 100% { border-color: rgba(255,80,80,0.4); }
-  50%       { border-color: rgba(255,80,80,0.9); }
-}
-
-.card.done span { color: #ff6060; }
-
-/* CRONÔMETRO */
-.sw-sep { font-size: 28px; margin-bottom: 22px; }
-
-.sw-controls {
-  display: flex;
-  gap: 12px;
-}
-
-.sw-btn {
-  font-family: system-ui, sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 10px 28px;
-  border-radius: 6px;
-  border: 1px solid var(--border-mid);
-  background: var(--card);
-  color: var(--text);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-}
-
-.sw-btn:hover { background: #222; border-color: rgba(255,255,255,0.28); }
-.sw-btn.running { border-color: rgba(255,80,80,0.5); color: #ff6060; }
-.sw-btn--ghost { background: transparent; color: var(--muted); }
-.sw-btn--ghost:hover { background: transparent; color: var(--text); }
-
+/* ─── TIMER DONE ─── */
+.card span.done { color: var(--accent); }
