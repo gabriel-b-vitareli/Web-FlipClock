@@ -441,10 +441,26 @@ function setZen(on) {
   if (on) {
     hint.classList.add('visible');
     setTimeout(() => hint.classList.remove('visible'), 3000);
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log("Falha ao entrar em tela cheia:", err);
+      });
+    }
   } else {
     hint.classList.remove('visible');
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(err => {
+        console.log("Falha ao sair de tela cheia:", err);
+      });
+    }
   }
 }
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && zenMode) {
+    setZen(false);
+  }
+});
 
 function toggleZen() { setZen(!zenMode); }
 

@@ -216,6 +216,10 @@ body {
 /* ═══════════════════════════════════════════════════════
    MODO ZEN
    ═══════════════════════════════════════════════════════ */
+body.zen {
+  cursor: none !important;
+}
+
 body.zen .sidebar,
 body.zen .theme-panel,
 body.zen .ui-element {
