@@ -540,3 +540,360 @@ body.zen .sidebar { transform: translateX(-100%); }
 
 /* ─── TIMER DONE ─── */
 .card span.done { color: var(--accent); }
+
+/* ─── CANVAS E BACKGROUNDS CUSTOMIZADOS ─── */
+.fx-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.custom-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -3;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transition: filter 0.3s ease;
+}
+
+.custom-bg-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* ─── PAINEL COM SCROLL E CONTROLES ─── */
+.theme-panel--scroll {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.theme-panel--scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.theme-panel--scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.theme-panel--scroll::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+  border-radius: 3px;
+}
+
+.custom-bg-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.custom-file-upload {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: center;
+  background: var(--card-bot);
+  border: 1px dashed var(--border-mid);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.custom-file-upload:hover {
+  border-color: var(--accent);
+  background: var(--card);
+}
+
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.control-label {
+  font-family: system-ui, sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  background: var(--border-mid);
+}
+
+/* ─── MODAIS ─── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.modal.hidden {
+  display: none !important;
+  opacity: 0;
+}
+
+.modal-content {
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: modalSlide 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  overflow: hidden;
+}
+
+@keyframes modalSlide {
+  from { transform: translateY(20px) scale(0.95); }
+  to { transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: var(--text);
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.form-group input[type="text"] {
+  background: var(--card-bot);
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input[type="text"]:focus {
+  border-color: var(--accent);
+}
+
+.color-pickers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.picker-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-bot);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.picker-group label {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.picker-group input[type="color"] {
+  border: none;
+  background: none;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  outline: none;
+}
+
+.theme-preview-box {
+  background: #000;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Mini relógio para preview do modal */
+.mini-clock-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mini-card-container {
+  width: 32px;
+  height: 44px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: var(--preview-text, #ffffff);
+}
+
+.mini-card-top {
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 50%;
+  background: var(--preview-card, #1a1a1a);
+  border-bottom: 0.5px solid var(--preview-border, rgba(255,255,255,0.15));
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+.mini-card-bot {
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 50%;
+  background: var(--preview-card-bot, #141414);
+  border-top: 0.5px solid var(--preview-border, rgba(255,255,255,0.15));
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.mini-label {
+  font-family: system-ui, sans-serif;
+  font-size: 8px;
+  text-transform: uppercase;
+  color: var(--preview-muted, #555555);
+}
+
+.mini-sep {
+  font-size: 18px;
+  color: var(--preview-muted, #555555);
+  margin-bottom: 12px;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: var(--card-bot);
+}
+
+/* Botão de Deletar Tema Customizado */
+.theme-swatch {
+  position: relative;
+}
+
+.btn-delete-theme {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 5;
+}
+
+.theme-swatch:hover .btn-delete-theme {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.btn-delete-theme:hover {
+  background: #ff1a1a;
+}
+
